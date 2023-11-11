@@ -29,12 +29,12 @@ session_start();
                 <a href="./" class="mx-10 text-lg font-thin">Brand name</a>
             </div>
             <!--<div class="navbar-start md:navbar-center relative">
-            <input id="searchInput" type="search" placeholder="Search movies.."
-                   class="input input-primary w-44 md:w-full text-inherit/50 pl-10"/>
-            <span class="absolute flex items-center pl-3">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </span>
-        </div>-->
+                <input id="searchInput" type="search" placeholder="Search movies.."
+                    class="input input-primary w-44 md:w-full text-inherit/50 pl-10"/>
+                <span class="absolute flex items-center pl-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+            </div>-->
             <div class="navbar-end gap-3 sm:mr-5">
                 <?php if (isset($_SESSION['userid'])) {
                     echo '<div class="dropdown dropdown-bottom">
@@ -99,7 +99,7 @@ session_start();
     const star = `<div><i class="fa-solid fa-star"></i></div>`;
     const halfStar = `<div><i class="fa-solid fa-star-half-stroke"></i></div>`;
     const emptyStar = `<div><i class="fa-regular fa-star"></i></div>`;
-    const debounceSearch = debounce(search, 500);
+    // const debounceSearch = debounce(search, 500);
 
     function debounce(func, delay) {
         let debounceTimer;
@@ -110,9 +110,9 @@ session_start();
             debounceTimer = setTimeout(() => func.apply(context, args), delay);
         };
     }
-    $('#searchInput').on('keyup', function () {
-        debounceSearch($(this).val());
-    });
+    // $('#searchInput').on('keyup', function () {
+    //     debounceSearch($(this).val());
+    // });
     function loadReviews() {
         $.ajax({
             method: 'get',
@@ -157,7 +157,6 @@ session_start();
                             reviewsCarousel.empty();
                             reviews.forEach(review => {
                                 let movie = moviesById[review.movie_id];
-                                console.log(movie);
                                 if (movie) {
                                     reviewsCarousel.append(`
                                         <div class="card bg-neutral">
@@ -326,6 +325,26 @@ session_start();
             success: function (response) {
                 const res = JSON.parse(response);
                 if (res.success) {
+                    alert(res.success)
+                    window.location.href = './login';
+                } else {
+                    alert(res.error);
+                }
+            }
+        });
+    }
+    function sessionExpire() {
+        $.ajax({
+            url: 'api.php',
+            type: 'post',
+            data: {
+                logout: true,
+                expire: true
+            },
+            success: function (response) {
+                const res = JSON.parse(response);
+                if (res.success) {
+                    alert(res.success)
                     window.location.href = './login';
                 } else {
                     alert(res.error);
@@ -334,6 +353,6 @@ session_start();
         });
     }
     setTimeout(function () {
-        logout(); // Call the logout function after 30 minutes
+        sessionExpire();
     }, 30 * 60 * 1000);
 </script>

@@ -201,8 +201,27 @@
         });
     }
 
+    function sessionExpire() {
+        $.ajax({
+            url: 'api.php',
+            type: 'post',
+            data: {
+                logout: true,
+                expire: true
+            },
+            success: function (response) {
+                const res = JSON.parse(response);
+                if (res.success) {
+                    alert(res.success)
+                    window.location.href = './login';
+                } else {
+                    alert(res.error);
+                }
+            }
+        });
+    }
     setTimeout(function () {
-        logout(); // Call the logout function after 30 minutes
+        sessionExpire();
     }, 30 * 60 * 1000);
 
     function viewMovieReviews(movieId) {

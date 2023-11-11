@@ -9,7 +9,6 @@ if (isset($_SESSION['userid'])) {
     if ($_SESSION['expire'] <= time()) {
         session_destroy();
         echo json_encode(array('error' => 'Session expired, please login again.'));
-        exit();
     } else {
         $_SESSION['expire'] = time() + 30 * 60;
     }
@@ -130,7 +129,11 @@ if (isset($_POST['submitReview'])) {
 
 if (isset($_POST['logout'])) {
     session_destroy();
-    echo json_encode(array('success' => 'Logged out successfully'));
+    if (isset($_POST['expire'])) {
+        echo json_encode(array('success' => 'Session expired. Log in again.'));
+    } else {
+        echo json_encode(array('success' => 'Logged out successfully'));
+    }
 }
 
 if (isset($_GET['getMovieReviews'])) {
