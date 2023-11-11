@@ -30,11 +30,8 @@ if (isset($_GET['searchMovies'])) {
     if (count($db->res) > 0) {
         echo json_encode($db->res);
     } else {
-        echo json_encode(array());
+        echo json_encode(array('error' => 'This movie does not exist in the database.'));
     }
-}
-
-    echo $response->getBody();
 }
 
 if (isset($_POST['login'])) {
