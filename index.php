@@ -261,61 +261,62 @@ session_start();
             }
         });
     }
+    function search(query) {
+    if (query.trim() === '') {
+        $('#searchResults').empty();
+        return;
+    }
 
-    // function search(query) {
-    //     $.ajax({
-    //         method: 'get',
-    //         url: 'api.php',
-    //         data: {
-    //             searchMovies: true,
-    //             query: query,
-    //         },
-    //         success: function (response) {
-    //             if (query === '') {
-    //                 return false;
-    //             } else {
-    //                 let movies = JSON.parse(response);
-    //                 main.empty();
-    //                 main.append(`
-    //                 <div class="grid grid-cols-1 justify-center gap-5">
-    //                     <h1 class="text-2xl font-bold text-center mb-5">Search Results</h1>
-    //                 </div>
-    //                 `);
-    //                 console.log(movies)
-    //                 main.append(`<div id="search" class="grid grid-cols-1 mx-10 gap-x-0 gap-y-5 md:grid-cols-2 md:place-items-center lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-2">`)
-    //                 let search = $('#search');
-    //                 movies.results.forEach(function (movie) {
-    //                     search.append(`
-    //                         <div class="card bg-neutral min-h-16 w-full md:w-72">
-    //                             <figure>
-    //                                 <img class="object-cover md:h-64 md:w-72"
-    //                                      src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="...">
-    //                             </figure>
-    //                             <div class="card-body">
-    //                                 <div class="card-title line-clamp-1">${movie.original_title}</div>
-    //                                 <div class="flex flex-row">
-    //                                     ${star.repeat(Math.floor(movie.vote_average / 2))}
-    //                                     ${movie.vote_average % 2 !== 0 ? halfStar : ''}
-    //                                     ${emptyStar.repeat(5 - Math.floor(movie.vote_average / 2) - (movie.vote_average % 2 !== 0 ? 0.5 : 0))}
-    //                                 </div>
-    //                                 <p class="text-sm text-neutral-500 max-h-16 line-clamp-2">
-    //                                     ${movie.overview}
-    //                                 </p>
-    //                                 <div class="card-actions justify-start lg:justify-center">
-    //                                     <a href="" class="glass btn btn-md btn-primary">View Details</a>
-    //                                 </div>
-    //                             </div>
+    $.ajax({
+        method: 'get',
+        url: 'api.php',
+        data: {
+            searchMovies: true,
+            query: query,
+        },
+        success: function (response) {
+            let movies = JSON.parse(response);
 
-    //                         </div>
-    //                     `)
-    //                 });
-    //                 main.append(`</div>`)
-    //             }
+            $('#searchResults').empty();
 
-    //         },
-    //     });
-    //     return false;
-    // }
+            if (movies.length === 0) {
+                $('#searchResults').append(`
+                    <p class="text-md text-center font-thin mx-5 max-w-screen-sm md:text-lg">
+                        No results found for "${query}".
+                    </p>
+                `);
+            } else {
+                let searchResults = $('#searchResults');
+                searchResults.append('<div id="search" class="grid grid-cols-1 mx-10 gap-x-0 gap-y-5 md:grid-cols-2 md:place-items-center lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-2">');
+
+                movies.forEach(function (movie) {
+                    searchResults.find('#search').append(`
+                        <div class="card bg-neutral min-h-16 w-full md:w-72">
+                            <figure>
+                                <img class="object-cover md:h-64 md:w-72"
+                                     src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="...">
+                            </figure>
+                            <div class="card-body">
+                                <div class="card-title line-clamp-1">${movie.title}</div>
+                                <div class="flex flex-row">
+                                    ${star.repeat(Math.floor(movie.vote_average / 2))}
+                                    ${movie.vote_average % 2 !== 0 ? halfStar : ''}
+                                    ${emptyStar.repeat(5 - Math.floor(movie.vote_average / 2) - (movie.vote_average % 2 !== 0 ? 0.5 : 0))}
+                                </div>
+                                <p class="text-sm text-neutral-500 max-h-16 line-clamp-2">
+                                    ${movie.overview}
+                                </p>
+                                <div class="card-actions justify-start lg:justify-center">
+                                    <a href="" class="glass btn btn-md btn-primary">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+
+                searchResults.append('</div>');
+            }
+        },
     function logout() {
         $.ajax({
             url: 'api.php',
