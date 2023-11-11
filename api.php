@@ -26,12 +26,13 @@ if (isset($_GET['getPopularMovies'])) {
 
 if (isset($_GET['searchMovies'])) {
     $query = $_GET['query'];
-    $response = $client->request('GET', "https://api.themoviedb.org/3/search/movie?query={$query}&include_adult=false&language=en-US&page=1", [
-        'headers' => [
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNzZkNDFhNDYxMjkxNWI5MzM4ODc3NWNiMmU4NDc1NCIsInN1YiI6IjYyZWI1OTRlNmQ5ZmU4MDA1ZWVkZWMwZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.X-dJ5FQYwiUmdNGy2os8VPbb3MQl9FlApj7wi6dBsdE',
-            'accept' => 'application/json',
-        ],
-    ]);
+    $db->select('movies', '*', "title LIKE '%$query%' OR overview LIKE '%$query%'");
+    if (count($db->res) > 0) {
+        echo json_encode($db->res);
+    } else {
+        echo json_encode(array());
+    }
+}
 
     echo $response->getBody();
 }
