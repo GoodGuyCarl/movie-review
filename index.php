@@ -113,6 +113,77 @@ session_start();
     // $('#searchInput').on('keyup', function () {
     //     debounceSearch($(this).val());
     // });
+      function createMovie() {
+        const title = prompt("Enter the movie title:");
+        const overview = prompt("Enter the movie overview:");
+
+        if (title && overview) {
+            $.ajax({
+                url: 'api.php',
+                type: 'post',
+                data: {
+                    createMovie: true,
+                    title: title,
+                    overview: overview,
+                },
+                success: function (result) {
+                    loadMovies();
+                    alert("Movie created successfully!");
+                },
+                error: function (err) {
+                    console.error('Error creating movie:', err);
+                    alert("Failed to create the movie. Please try again.");
+                }
+            });
+        }
+    }
+
+    function updateMovie(movieId) {
+        const newTitle = prompt("Enter the updated movie title:");
+        const newOverview = prompt("Enter the updated movie overview:");
+
+        if (newTitle && newOverview) {
+            $.ajax({
+                url: 'api.php',
+                type: 'post',
+                data: {
+                    updateMovie: true,
+                    movieId: movieId,
+                    title: newTitle,
+                    overview: newOverview,
+                },
+                success: function (result) {
+                    loadMovies();
+                    alert("Movie updated successfully!");
+                },
+                error: function (err) {
+                    console.error('Error updating movie:', err);
+                    alert("Failed to update the movie. Please try again.");
+                }
+            });
+        }
+    }
+
+    function deleteMovie(movieId) {
+        if (confirm("Are you sure you want to delete this movie?")) {
+            $.ajax({
+                url: 'api.php',
+                type: 'post',
+                data: {
+                    deleteMovie: true,
+                    movieId: movieId,
+                },
+                success: function (result) {
+                    loadMovies();
+                    alert("Movie deleted successfully!");
+                },
+                error: function (err) {
+                    console.error('Error deleting movie:', err);
+                    alert("Failed to delete the movie. Please try again.");
+                }
+            });
+        }
+    }
     function loadReviews() {
         $.ajax({
             method: 'get',
