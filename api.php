@@ -83,6 +83,35 @@ if (isset($_GET['getMovies'])) {
     }
 
 }
+if (isset($_POST['updateMovie'])) {
+    $movie_id = $_POST['movieId'];
+    $newTitle = $_POST['title'];
+    $newOverview = $_POST['overview'];
+    try {
+        $db->update(
+            'movies',
+            array(
+                'title' => $newTitle,
+                'overview' => $newOverview
+            ),
+            "movie_id='{$movie_id}'"
+        );
+        echo json_encode(array('success' => 'Movie updated successfully'));
+    } catch (Exception $e) {
+        echo json_encode(array('error' => $e->getMessage()));
+    }
+}
+
+if (isset($_POST['deleteMovie'])) {
+    $movie_id = $_POST['movieId'];
+    try {
+        $db->delete('movies', "movie_id='{$movie_id}'");
+        echo json_encode(array('success' => 'Movie deleted successfully'));
+    } catch (Exception $e) {
+        echo json_encode(array('error' => $e->getMessage()));
+    }
+}
+
 
 if (isset($_GET['getReviews'])) {
     $db->select('reviews');
