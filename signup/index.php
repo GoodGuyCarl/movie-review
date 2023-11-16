@@ -1,5 +1,12 @@
 <?php session_start();
-isset($_SESSION['userid']) ? header('Location: ../index.php') && exit() : header('');
+if (isset($_SESSION['userid'])) {
+    header('Location: ../index.php');
+    exit();
+}
+if (isset($_SESSION['fb_user_id'])) {
+    header('Location: ../index.php');
+    exit();
+}
 ?>
 <!doctype html>
 <html lang="en">

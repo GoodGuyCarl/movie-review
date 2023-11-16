@@ -1,16 +1,24 @@
 <?php session_start();
-isset($_SESSION['userid']) ? header('Location: ../index.php') && exit() : header('');
-// require '../vendor/autoload.php';
-// $fb = new Facebook\Facebook([
-//     'app_id' => '6621295174664204',
-//     'app_secret' => 'f5801e183902397cb28ce980fae25af8',
-//     'default_graph_version' => 'v18.0',
-// ]);
+if (isset($_SESSION['userid'])) {
+    header('Location: ../index.php');
+    exit();
+}
+if (isset($_SESSION['fb_user_id'])) {
+    header('Location: ../index.php');
+    exit();
+}
+// isset($_SESSION['userid']) ? header('Location: ../index.php') && exit() : header('');
+require '../vendor/autoload.php';
+$fb = new Facebook\Facebook([
+    'app_id' => '6621295174664204',
+    'app_secret' => 'f5801e183902397cb28ce980fae25af8',
+    'default_graph_version' => 'v18.0',
+]);
 
-// $helper = $fb->getRedirectLoginHelper();
+$helper = $fb->getRedirectLoginHelper();
 
-// $permissions = ['public_profile', 'email']; // Optional permissions
-// $loginUrl = $helper->getLoginUrl('http://localhost/movie-review/facebook-callback.php', $permissions);
+$permissions = ['public_profile', 'email']; // Optional permissions
+$loginUrl = $helper->getLoginUrl('http://localhost/movie-review/facebook-callback.php', $permissions);
 
 ?>
 <!doctype html>

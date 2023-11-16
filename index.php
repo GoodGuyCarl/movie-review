@@ -1,5 +1,17 @@
 <?php
 session_start();
+require 'vendor/autoload.php';
+$fb = new Facebook\Facebook([
+    'app_id' => '6621295174664204',
+    'app_secret' => 'f5801e183902397cb28ce980fae25af8',
+    'default_graph_version' => 'v18.0',
+]);
+
+$helper = $fb->getRedirectLoginHelper();
+if (isset($_SESSION['fb_access_token'])) {
+    $logoutUrl = $helper->getLogoutUrl($_SESSION['fb_access_token'], 'https://localhost/movie-review/login');
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,6 +48,8 @@ session_start();
             <div class="navbar-end gap-3 sm:mr-5">
                 <?php if (isset($_SESSION['userid'])) {
                     echo '<a onclick="logout()" class="btn btn-outline btn-primary"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>';
+                } else if (isset($_SESSION['fb_user_id'])) {
+                    echo '<a href="' . $logoutUrl . '" class="btn btn-outline btn-primary"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>';
                 } else {
                     echo '<div class="grid grid-cols-2 gap-2">
                     <a href="./login" class="btn btn-outline btn-ghost">Login</a>

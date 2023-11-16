@@ -2,6 +2,7 @@
     "require": {
         "guzzlehttp/guzzle": "^7.8",
       "ext-mysqli": "*",
-      "ext-http": "*"
+        "google/apiclient": "^2.15",
+        "joelbutcher/facebook-graph-sdk": "^5.1"
     }
 }
