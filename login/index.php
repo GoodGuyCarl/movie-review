@@ -1,5 +1,17 @@
 <?php session_start();
 isset($_SESSION['userid']) ? header('Location: ../index.php') && exit() : header('');
+// require '../vendor/autoload.php';
+// $fb = new Facebook\Facebook([
+//     'app_id' => '6621295174664204',
+//     'app_secret' => 'f5801e183902397cb28ce980fae25af8',
+//     'default_graph_version' => 'v18.0',
+// ]);
+
+// $helper = $fb->getRedirectLoginHelper();
+
+// $permissions = ['public_profile', 'email']; // Optional permissions
+// $loginUrl = $helper->getLoginUrl('http://localhost/movie-review/facebook-callback.php', $permissions);
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -9,13 +21,11 @@ isset($_SESSION['userid']) ? header('Location: ../index.php') && exit() : header
     <meta name="viewport"
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous">
-        </script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-    <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
     <link href="../output.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/002afb9e14.js" crossorigin="anonymous"></script>
+    <script src="../js/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/slick.css">
+    <script src="../js/slick.min.js"></script>
+    <script src="../js/002afb9e14.js"></script>
     <title>Login</title>
 </head>
 
@@ -42,6 +52,13 @@ isset($_SESSION['userid']) ? header('Location: ../index.php') && exit() : header
                 <a class="underline text-sm text-gray-600 hover:text-gray-900" href="../signup">
                     Don't have an account?
                 </a>
+                <div class="flex flex-row justify-between">
+                    <a href="<?php echo htmlspecialchars($loginUrl) ?>" class="btn btn-outline btn-sm btn-info"><i
+                            class="fa-brands fa-facebook"></i>Sign in with
+                        Facebook</a>
+                    <a href="" class="btn btn-outline btn-sm btn-error"><i class="fa-brands fa-google"></i>Sign in with
+                        Google</a>
+                </div>
                 <button type="submit" class="btn btn-primary my-4">
                     Login
                 </button>
