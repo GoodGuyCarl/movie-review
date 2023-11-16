@@ -110,7 +110,7 @@
                     movies.forEach((movie) => {
                         $('#main').append(`
                                 <dialog id="modal_${movie.id}" class="modal">
-                                    <form id="reviewForm" class="modal-box gap-5 flex flex-col drop-shadow">
+                                    <form id="reviewForm_${movie.id}" class="modal-box gap-5 flex flex-col drop-shadow">
                                         <h3 class="font-bold text-2xl">Create a review</h3>
                                         <input placeholder="Movie" type="text" class="input input-bordered input-primary w-full" id="movie" value="${movie.title}" disabled>
                                         <input hidden type="text" class="input input-bordered input-primary w-full" id="movie_id" value="${movie.id}">
@@ -127,7 +127,7 @@
                                         <div class="modal-action mt-0">
                                             <div class="w-full justify-between flex">
                                                 <button formmethod="dialog" class="btn btn-sm md:btn-md">Cancel</button>
-                                                <button id="submitReviewBtn" type="submit" formmethod="post" class="btn btn-sm md:btn-md btn-primary">Submit</button>
+                                                <button id="submitReviewBtn_${movie.id}" type="submit" formmethod="post" class="btn btn-sm md:btn-md btn-primary">Submit</button>
                                             </div>
                                         </div>
                                     </form>
@@ -179,7 +179,7 @@
                                 }
                             })
                         })
-                        $('#submitReviewBtn').click(function (e) {
+                        $('#main').on('click', '#submitReviewBtn_' + movie.id, function (e) {
                             e.preventDefault();
                             let form = $(this).closest('form');
                             let movie_id = form.find('#movie_id').val();
