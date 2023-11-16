@@ -15,33 +15,37 @@ if (isset($_SESSION['userid'])) {
 }
 
 if (isset($_GET['getPopularMovies'])) {
-    $response = $client->request('GET', 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', [
-        'headers' => [
-            'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNzZkNDFhNDYxMjkxNWI5MzM4ODc3NWNiMmU4NDc1NCIsInN1YiI6IjYyZWI1OTRlNmQ5ZmU4MDA1ZWVkZWMwZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.X-dJ5FQYwiUmdNGy2os8VPbb3MQl9FlApj7wi6dBsdE',
-            'accept' => 'application/json',
-        ],
-    ]);
-    echo $response->getBody();
+    try {
+        $response = $client->request('GET', 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1', [
+            'headers' => [
+                'Authorization' => 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJhNzZkNDFhNDYxMjkxNWI5MzM4ODc3NWNiMmU4NDc1NCIsInN1YiI6IjYyZWI1OTRlNmQ5ZmU4MDA1ZWVkZWMwZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.X-dJ5FQYwiUmdNGy2os8VPbb3MQl9FlApj7wi6dBsdE',
+                'accept' => 'application/json',
+            ],
+        ]);
+        echo $response->getBody();
+    } catch (Exception $e) {
+        echo json_encode(array('error' => 'Error fetching popular movies... ' . $e->getMessage()));
+    }
 }
 
 if (isset($_GET['searchMovies'])) {
     $query = $_GET['query'];
-    $db->select('movies', '*', "title LIKE '%$query%' OR overview LIKE '%$query%'");
+    $db->select('movies', '*', "title LIKE '%{$query}%' OR overview LIKE '%{$query}%'");
     if (count($db->res) > 0) {
         echo json_encode($db->res);
     } else {
-        echo json_encode(array('error' => 'This movie does not exist in the database.'));
+        echo json_encode(array('error' => 'This movie does not exist in the database. Contact an administrator.'));
     }
 }
 
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
-    $password = $_POST['password'];
-    $db->select('users', '*', "email='{$email}' AND password='{$password}'");
-    if (count($db->res) > 0) {
-        $_SESSION['userid'] = $db->res[0]['id'];
+    $user = $db->select('users', '*', "email='{$email}'");
+    if (count($user) > 0 && password_verify($_POST['password'], $user[0]['password'])) {
+        $_SESSION['userid'] = $user[0]['id'];
+        $_SESSION['role'] = $user[0]['role'];
         $_SESSION['expire'] = time() + 30 * 60;
-        echo json_encode($db->res[0]);
+        echo json_encode($db->res);
     } else {
         echo json_encode(array('error' => 'Invalid credentials'));
     }
@@ -49,13 +53,15 @@ if (isset($_POST['login'])) {
 
 if (isset($_POST['signup'])) {
     $email = $_POST['email'];
-    $password = $_POST['password'];
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $role = 'user';
     try {
         $db->insert(
             'users',
             array(
                 'email' => $email,
-                'password' => $password
+                'password' => $password,
+                'role' => $role
             )
         );
         echo json_encode(array('success' => 'User created successfully'));
@@ -78,13 +84,30 @@ if (isset($_GET['getMovies'])) {
         if (count($db->res) > 0) {
             echo json_encode($db->res);
         } else {
-            echo json_encode(array('error' => 'There are currently no movies in the database. Try again later.'));
+            echo json_encode(array('error' => 'There are currently no movies in the database. Please contact an administrator.'));
         }
     }
-
 }
+if (isset($_POST['createMovie'])) {
+    $movie_name = $_POST['movie_name'];
+    $movie_overview = $_POST['movie_overview'];
+
+    try {
+        $db->insert(
+            'movies',
+            array(
+                'title' => $movie_name,
+                'overview' => $movie_overview,
+            )
+        );
+        echo json_encode(array('success' => 'Movie created successfully!'));
+    } catch (Exception $e) {
+        echo json_encode(array('error' => $e->getMessage()));
+    }
+}
+
 if (isset($_POST['updateMovie'])) {
-    $movie_id = $_POST['movieId'];
+    $movieId = $_POST['movieId'];
     $newTitle = $_POST['title'];
     $newOverview = $_POST['overview'];
     try {
@@ -94,7 +117,7 @@ if (isset($_POST['updateMovie'])) {
                 'title' => $newTitle,
                 'overview' => $newOverview
             ),
-            "movie_id='{$movie_id}'"
+            "id='{$movieId}'"
         );
         echo json_encode(array('success' => 'Movie updated successfully'));
     } catch (Exception $e) {
@@ -105,7 +128,7 @@ if (isset($_POST['updateMovie'])) {
 if (isset($_POST['deleteMovie'])) {
     $movie_id = $_POST['movieId'];
     try {
-        $db->delete('movies', "movie_id='{$movie_id}'");
+        $db->delete('movies', "id='{$movie_id}'");
         echo json_encode(array('success' => 'Movie deleted successfully'));
     } catch (Exception $e) {
         echo json_encode(array('error' => $e->getMessage()));

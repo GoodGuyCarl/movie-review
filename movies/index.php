@@ -21,24 +21,16 @@
             <div class="navbar-start">
                 <a href="../" class="mx-10 text-lg font-thin">Brand name</a>
             </div>
-            <!--<div class="navbar-start md:navbar-center relative">
-            <input id="searchInput" type="search" placeholder="Search movies.."
-                   class="input input-primary w-44 md:w-full text-inherit/50 pl-10"/>
-            <span class="absolute flex items-center pl-3">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </span>
-        </div>-->
+            <div class="navbar-start md:navbar-center relative">
+                <input id="searchInput" type="search" placeholder="Search movies.."
+                    class="input input-primary w-44 md:w-full text-inherit/50 pl-10" />
+                <span class="absolute flex items-center pl-3">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+            </div>
             <div class="navbar-end gap-3 sm:mr-5">
                 <?php if (isset($_SESSION['userid'])) {
-                    echo '<div class="dropdown dropdown-bottom">
-                    <label tabindex="0" class="btn-sm rounded-btn cursor-pointer">
-                        Hello, User!
-                        <i class="fa-regular fa-face-smile"></i>
-                    </label>
-                    <ul class="dropdown-content z-[1] menu p-2 drop-shadow bg-base-200 rounded-box w-28" tabindex="0">
-                        <li><a onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i>Logout</a></li>
-                    </ul>
-                </div>';
+                    echo '<a onclick="logout()" class="btn btn-outline btn-primary"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>';
                 } else {
                     echo '<div class="grid grid-cols-2 gap-2">
                     <a href="../login" class="btn btn-outline btn-ghost">Login</a>
@@ -49,14 +41,34 @@
         </div>
     </nav>
     <main id="main">
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+            echo '<dialog id="addMovie" class="modal">
+            <form id="movieForm" class="modal-box gap-5 flex flex-col drop-shadow">
+                <h3 class="font-bold text-2xl">Create a movie</h3>
+                <input placeholder="Movie name" type="text" class="input input-bordered input-primary w-full"
+                    id="movie">
+                <textarea class="textarea h-32 textarea-bordered textarea-primary w-full"
+                    placeholder="Movie overview"></textarea>
+                <div class="modal-action mt-0">
+                    <div class="w-full justify-between flex">
+                        <button formmethod="dialog" class="btn btn-sm md:btn-md">Cancel</button>
+                        <button id="addMovieBtn" type="submit" formmethod="post"
+                            class="btn btn-sm md:btn-md btn-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        </dialog>';
+        } ?>
         <div id="mainDiv" class="container mx-auto my-5 grid grid-cols-1">
-            <div id="sectionTitle" class="flex mx-5 my-5">
+            <div id="sectionTitle" class="flex mx-5 my-5 gap-5">
                 <h1 class="text-2xl font-bold">Available Movies</h1>
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+                    echo '<button class="btn btn-primary btn-sm" onclick="addMovie.showModal()">Add Movies</button>';
+                } ?>
             </div>
             <div id="moviesCard" class="grid grid-cols-2 gap-2 mx-2.5 md:grid-cols-3 lg:grid-cols-4">
             </div>
         </div>
-
     </main>
     <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-auto">
         <aside>
@@ -64,17 +76,19 @@
         </aside>
     </footer>
 </body>
+
+</html>
 <script>
     const star = `<div><i class="fa-solid fa-star"></i></div>`;
     const halfStar = `<div><i class="fa-solid fa-star-half-stroke"></i></div>`;
     const emptyStar = `<div><i class="fa-regular fa-star"></i></div>`;
+    const [reviewForm, moviesCard, sectionTitle, main] = [$('#reviewForm'), $('#moviesCard'), $('#sectionTitle'), $('#mainDiv')];
+    const isLoggedIn = <?php echo isset($_SESSION['userid']) ? 'true' : 'false'; ?>
 
     $(document).ready(() => {
         loadMovies();
     })
 
-
-    const reviewForm = $('#reviewForm');
     function loadMovies() {
         $.ajax({
             url: '../api.php',
@@ -84,8 +98,6 @@
             },
             success: function (result) {
                 let movies = JSON.parse(result);
-                let moviesCard = $('#moviesCard');
-                let sectionTitle = $('#sectionTitle');
                 if (movies.error) {
                     moviesCard.empty();
                     sectionTitle.after(`
@@ -95,7 +107,6 @@
                         `)
                 }
                 else {
-                    console.log(movies)
                     movies.forEach((movie) => {
                         $('#main').append(`
                                 <dialog id="modal_${movie.id}" class="modal">
@@ -116,12 +127,59 @@
                                         <div class="modal-action mt-0">
                                             <div class="w-full justify-between flex">
                                                 <button formmethod="dialog" class="btn btn-sm md:btn-md">Cancel</button>
-                                                <button type="submit" formmethod="post" class="btn btn-sm md:btn-md btn-primary submitBtn">Submit</button>
+                                                <button id="submitReviewBtn" type="submit" formmethod="post" class="btn btn-sm md:btn-md btn-primary">Submit</button>
                                             </div>
                                         </div>
                                     </form>
-                                </dialog>`)
-                        $('.submitBtn').click(function (e) {
+                                </dialog>
+                                `)
+                        $('#main').append(`
+                        <dialog id="update_movie_${movie.id}" class="modal">
+                            <form id="movieForm" class="modal-box gap-5 flex flex-col drop-shadow">
+                                <h3 class="font-bold text-2xl">Update ${movie.title}</h3>
+                                <input type="text" class="input input-bordered input-primary w-full" id="movie" value="${movie.title}">
+                                <input type="hidden" id="movieId" value="${movie.id}">
+                                <textarea id="updateTextArea" class="textarea h-32 textarea-bordered textarea-primary w-full"
+                                    placeholder="Movie overview"></textarea>
+                                <div class="modal-action mt-0">
+                                    <div class="w-full justify-between flex">
+                                        <button formmethod="dialog" class="btn btn-sm md:btn-md">Cancel</button>
+                                        <button id="updateMovieBtn" type="submit" formmethod="post"
+                                            class="btn btn-sm md:btn-md btn-primary">Update</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </dialog>
+                        `)
+                        $('#updateTextArea').val(movie.overview)
+                        $('#updateMovieBtn').click(function (e) {
+                            e.preventDefault();
+                            let form = $(this).closest('form');
+                            let movieId = form.find('#movieId').val();
+                            let newTitle = form.find('#movie').val();
+                            let newOverview = form.find('#updateTextArea').val();
+                            $.ajax({
+                                url: '../api.php',
+                                type: 'post',
+                                data: {
+                                    updateMovie: true,
+                                    movieId: movieId,
+                                    title: newTitle,
+                                    overview: newOverview,
+                                },
+                                success: function (response) {
+                                    let update = JSON.parse(response);
+                                    if (update.error) {
+                                        alert(update.error);
+                                    }
+                                    if (update.success) {
+                                        alert(update.success);
+                                        location.reload();
+                                    }
+                                }
+                            })
+                        })
+                        $('#submitReviewBtn').click(function (e) {
                             e.preventDefault();
                             let form = $(this).closest('form');
                             let movie_id = form.find('#movie_id').val();
@@ -160,16 +218,25 @@
                         });
                         moviesCard.append(`
                                 <div class="card bg-neutral w-full max-w-full">
-                                    <div class="card-body">
+                                    <div class="card-body gap-5">
                                         <div class="card-title">
                                             <h5 class="text-md font-bold line-clamp-1">${movie.title}</h5>
                                             
                                         </div>
                                         <p class="text-sm line-clamp-3">${movie.overview}</p>
-                                        <div class="card-actions flex-nowrap justify-between">
-                                            <button class="btn btn-outline btn-xs sm:btn-sm lg:btn-md" onclick="viewMovieReviews(${movie.id})">View</button>
-                                            <?php if (isset($_SESSION['userid'])) {
+                                        <div class="card-actions flex-nowrap justify-between md:justify">
+                                            <button class="btn btn-outline btn-xs sm:btn-sm lg:btn-md" onclick="viewMovieReviews(${movie.id})"><i class="fa-solid fa-eye"></i></button>
+                                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'user') {
                                                 echo '<button class="btn btn-primary btn-xs sm:btn-sm lg:btn-md" onclick="modal_${movie.id}.showModal()">Review</button>';
+                                            } ?>
+                                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+                                                echo '
+                                                    <div class="flex flex-row flex-nowrap space-evenly gap-2">
+                                                    <button class="btn btn-outline btn-primary btn-xs sm:btn-sm lg:btn-md" onclick="update_movie_${movie.id}.showModal()"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                    <button class="btn btn-outline btn-secondary btn-xs sm:btn-sm lg:btn-md" onclick="deleteMovie(${movie.id})"><i class="fa-solid fa-trash"></i></button>
+                                                    
+                                                    </div>
+                                                ';
                                             } ?>
                                         </div>
                                     </div>
@@ -221,7 +288,10 @@
         });
     }
     setTimeout(function () {
-        sessionExpire();
+        let isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+        if (isLoggedIn) {
+            sessionExpire();
+        }
     }, 30 * 60 * 1000);
 
     function viewMovieReviews(movieId) {
@@ -235,7 +305,6 @@
             success: function (movieResponse) {
                 let movies = JSON.parse(movieResponse);
                 let moviesById = {};
-                const main = $('#mainDiv');
                 main.empty();
                 movies.forEach(movie => {
                     moviesById[movie.id] = movie;
@@ -257,10 +326,17 @@
                         const main = $('#mainDiv');
                         main.append(`<div id="reviewsGrid" class="grid grid-cols-4 gap-5 mx-auto">`)
                         const reviewGrid = $('#reviewsGrid');
-                        reviews.forEach((review) => {
-                            let movie = moviesById[review.movie_id];
-                            if (movie) {
-                                reviewGrid.append(`
+                        if (reviews.error) {
+                            main.append(`
+                            <div class="mx-auto">
+                                ${reviews.error}
+                            </div>
+                            `)
+                        } else {
+                            reviews.forEach((review) => {
+                                let movie = moviesById[review.movie_id];
+                                if (movie) {
+                                    reviewGrid.append(`
                                     <div class="bg-base-200 p-5 rounded-lg">
                                         <div class="flex flex-row">
                                             ${star.repeat(review.review_rating)}
@@ -272,8 +348,9 @@
                                         </div>
                                     </div>
                                 `)
-                            }
-                        })
+                                }
+                            })
+                        }
                         reviewGrid.append(`</div>`)
                     }
                 })
@@ -281,6 +358,120 @@
         })
     }
 
-</script>
+    $('#addMovieBtn').on('click', function (e) {
+        e.preventDefault();
+        let form = $(this).closest('form');
+        let movie_name = form.find('input').val();
+        let movie_overview = form.find('textarea').val();
+        $.ajax({
+            url: '../api.php',
+            type: 'post',
+            data: {
+                createMovie: true,
+                movie_name: movie_name,
+                movie_overview: movie_overview
+            },
+            success: function (response) {
+                let data = JSON.parse(response);
+                if (data.success) {
+                    alert(data.success);
+                    location.reload();
+                }
+                if (data.error) {
+                    alert(data.error)
+                }
+            }
+        })
+    })
 
-</html>
+    function deleteMovie(movieId) {
+        $.ajax({
+            url: '../api.php',
+            type: 'post',
+            data: {
+                deleteMovie: true,
+                movieId: movieId
+            },
+            success: function (response) {
+                let data = JSON.parse(response);
+                if (data.success) {
+                    alert(data.success);
+                    location.reload();
+                }
+                else {
+                    alert(data.error);
+                }
+            }
+        })
+    }
+    const debounceSearch = debounce(search, 500);
+
+    function debounce(func, delay) {
+        let debounceTimer;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+    $('#searchInput').on('keyup', function () {
+        debounceSearch($(this).val());
+    });
+    function search(query) {
+        $.ajax({
+            method: 'get',
+            url: '../api.php',
+            data: {
+                searchMovies: true,
+                query: query,
+            },
+            success: function (response) {
+                if (query === '') {
+                    return false;
+                } else {
+                    let movies = JSON.parse(response);
+                    main.empty();
+                    main.append(`
+                    <div class="grid grid-cols-1 justify-center gap-5">
+                        <h1 class="text-2xl font-bold text-center mb-5">Search Results</h1>
+                    </div>
+                    `);
+                    if (movies.error) {
+                        main.append(`<div class="font-thin mx-auto">
+                        ${movies.error}
+                        </div>`);
+                    }
+                    else {
+                        main.append(`<div id="search" class="grid grid-cols-1 mx-10 gap-x-0 gap-y-5 md:grid-cols-2 md:place-items-center lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-2">`)
+                        let search = $('#search');
+                        movies.forEach(function (movie) {
+                            search.append(`
+                            <div class="card bg-neutral w-full max-w-full">
+                                    <div class="card-body gap-5">
+                                        <div class="card-title">
+                                            <h5 class="text-md font-bold line-clamp-1">${movie.title}</h5>
+                                            
+                                        </div>
+                                        <p class="text-sm line-clamp-3">${movie.overview}</p>
+                                        <div class="card-actions flex-nowrap justify-between md:justify">
+                                            <button class="btn btn-outline btn-xs sm:btn-sm lg:btn-md" onclick="viewMovieReviews(${movie.id})"><i class="fa-solid fa-eye"></i></button>
+                                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'user') {
+                                                echo '<button class="btn btn-primary btn-xs sm:btn-sm lg:btn-md" onclick="modal_${movie.id}.showModal()">Review</button>';
+                                            } ?>
+                                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+                                                echo '<button class="btn btn-outline btn-secondary btn-xs sm:btn-sm lg:btn-md" onclick="deleteMovie(${movie.id})"><i class="fa-solid fa-trash"></i></button>';
+                                            } ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            `)
+                        });
+                    }
+                    main.append(`</div>`)
+                }
+            },
+        });
+        return false;
+    }
+</script>
