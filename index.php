@@ -134,8 +134,8 @@ session_start();
                     popularCarousel.slick({
                         vertical: false,
                         mobileFirst: true,
-                        prevArrow: `<button>❮</button>`,
-                        nextArrow: `<button>❯</button>`,
+                        prevArrow: ``,
+                        nextArrow: ``,
                         width: '100%',
                         variableWidth: true,
                         infinite: true,
@@ -195,12 +195,10 @@ session_start();
                     reviewsCarousel.append(`${movies.error}`)
                     console.error('Error fetching movies: ', movies.error);
                 }
-                if (movies.success) {
-                    let moviesById = {};
-                    movies.forEach(movie => {
-                        moviesById[movie.id] = movie;
-                    });
-                }
+                let moviesById = {};
+                movies.forEach(movie => {
+                    moviesById[movie.id] = movie;
+                });
                 $.ajax({
                     method: 'get',
                     url: 'api.php',
@@ -228,6 +226,7 @@ session_start();
                         else {
                             reviewsCarousel.empty();
                             reviews.forEach(review => {
+                                console.log(moviesById)
                                 let movie = moviesById[review.movie_id];
                                 if (movie) {
                                     reviewsCarousel.append(`
@@ -252,8 +251,8 @@ session_start();
                             });
                             reviewsCarousel.slick({
                                 vertical: false,
-                                prevArrow: `<button>❮</button>`,
-                                nextArrow: `<button>❯</button>`,
+                                prevArrow: ``,
+                                nextArrow: ``,
                                 width: '100%',
                                 variableWidth: true,
                                 slidesToShow: 4,

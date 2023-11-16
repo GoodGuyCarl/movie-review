@@ -209,6 +209,7 @@
                                     }
                                     else {
                                         alert(response.success);
+                                        location.reload();
                                     }
                                 },
                                 error: function (err) {
@@ -324,7 +325,7 @@
                     success: function (response) {
                         const reviews = JSON.parse(response);
                         const main = $('#mainDiv');
-                        main.append(`<div id="reviewsGrid" class="grid grid-cols-4 gap-5 mx-auto">`)
+                        main.append(`<div id="reviewsGrid" class="grid grid-cols-4 gap-5">`)
                         const reviewGrid = $('#reviewsGrid');
                         if (reviews.error) {
                             main.append(`
