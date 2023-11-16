@@ -139,25 +139,25 @@
                                 <h3 class="font-bold text-2xl">Update ${movie.title}</h3>
                                 <input type="text" class="input input-bordered input-primary w-full" id="movie" value="${movie.title}">
                                 <input type="hidden" id="movieId" value="${movie.id}">
-                                <textarea id="updateTextArea" class="textarea h-32 textarea-bordered textarea-primary w-full"
+                                <textarea id="updateTextArea_${movie.id}" class="textarea h-32 textarea-bordered textarea-primary w-full"
                                     placeholder="Movie overview"></textarea>
                                 <div class="modal-action mt-0">
                                     <div class="w-full justify-between flex">
                                         <button formmethod="dialog" class="btn btn-sm md:btn-md">Cancel</button>
-                                        <button id="updateMovieBtn" type="submit" formmethod="post"
+                                        <button id="updateMovieBtn_${movie.id}" type="submit" formmethod="post"
                                             class="btn btn-sm md:btn-md btn-primary">Update</button>
                                     </div>
                                 </div>
                             </form>
                         </dialog>
                         `)
-                        $('#updateTextArea').val(movie.overview)
-                        $('#updateMovieBtn').click(function (e) {
+                        $('#updateTextArea_' + movie.id).val(movie.overview)
+                        $('#updateMovieBtn_' + movie.id).click(function (e) {
                             e.preventDefault();
                             let form = $(this).closest('form');
                             let movieId = form.find('#movieId').val();
                             let newTitle = form.find('#movie').val();
-                            let newOverview = form.find('#updateTextArea').val();
+                            let newOverview = form.find('.textarea').val();
                             $.ajax({
                                 url: '../api.php',
                                 type: 'post',
