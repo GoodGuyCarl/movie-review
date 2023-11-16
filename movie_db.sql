@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 03, 2023 at 11:29 AM
+-- Generation Time: Nov 16, 2023 at 08:39 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -33,13 +33,6 @@ CREATE TABLE `movies` (
   `overview` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `movies`
---
-
-INSERT INTO `movies` (`id`, `title`, `overview`) VALUES
-(1, 'Avengers: Endgame', 'Lorem impsum  a quick brown fox yada yada yada lorem ipsum the quick brown foxx makes a little jump Avengers, Thanos?');
-
 -- --------------------------------------------------------
 
 --
@@ -62,9 +55,17 @@ CREATE TABLE `reviews` (
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
+  `role` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `role`, `email`, `password`) VALUES
+(1, 'user', 'admin@test.com', '$2y$10$t9E23iYsCUMKwG.FFvbsPuS3vS/Ojy/h1PTUbI12yQWsRQ.cPwOWO');
 
 --
 -- Indexes for dumped tables
@@ -98,13 +99,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `movies`
 --
 ALTER TABLE `movies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
