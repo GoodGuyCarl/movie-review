@@ -36,7 +36,7 @@ if (isset($_SESSION['fb_access_token'])) {
      <nav>
           <div class="navbar bg-base-200">
                <div class="navbar-start">
-                    <a href="./" class="mx-10 text-lg font-thin">Brand name</a>
+                    <a href="./" class="mx-10 text-lg font-thin">Movie Reviews</a>
                </div>
                <div class="navbar-start md:navbar-center relative">
                     <input id="searchInput" type="search" placeholder="Search movies.." class="input input-primary w-44 md:w-full text-inherit/50 pl-10" />

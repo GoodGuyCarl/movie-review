@@ -41,19 +41,19 @@ if (!isset($accessToken)) {
 if (isset($accessToken)) {
     $oAuth2Client = $fb->getOAuth2Client();
     $tokenMetadata = $oAuth2Client->debugToken($accessToken);
-    $fbUserId = mysqli_real_escape_string($db->mysql, (int) $tokenMetadata->getUserId());
-    $user = $db->select('users', '*');
+    $fbUserId = $tokenMetadata->getUserId();
+    $email =  $response->getGraphUser()->getEmail();
+    $user = $db->select('users', '*', "email = '$email'");
     echo '<pre>
     ' . print_r($user) . '
     </pre>';
-    if (empty($user)) {
+    if (!$user) {
         $role = 'user';
         $expire = time() + 30 * 60;
         $fbAccessToken = mysqli_real_escape_string($db->mysql, (string) $accessToken);
         $password = password_hash($fbAccessToken, PASSWORD_BCRYPT);
         $email = $userNode = $response->getGraphUser()->getEmail();
         $db->insert('users', array(
-            'id' => $fbUserId,
             'email' => $email,
             'password' => $password,
             'role' => $role,
@@ -61,12 +61,10 @@ if (isset($accessToken)) {
     } else {
         $_SESSION['fb_user_id'] = $fbUserId;
         $_SESSION['fb_access_token'] = (string) $accessToken;
-        $_SESSION['role'] = $role;
+        $_SESSION['role'] = $user[0]['role'];
         $_SESSION['expire'] = $expire;
         $_SESSION['name'] = $userNode = $response->getGraphUser()->getName();
     }
-
-
     header('Location: index.php');
     exit;
 }

@@ -64,9 +64,9 @@ $loginUrl = $helper->getLoginUrl('http://localhost/movie-review/facebook-callbac
                          <a href="<?php echo htmlspecialchars($loginUrl) ?>" class="btn btn-outline btn-sm btn-info"><i
                                    class="fa-brands fa-facebook"></i>Sign in with
                               Facebook</a>
-                         <a href="" class="btn btn-outline btn-sm btn-error"><i class="fa-brands fa-google"></i>Sign in
+                         <!-- <a href="" class="btn btn-outline btn-sm btn-error"><i class="fa-brands fa-google"></i>Sign in
                               with
-                              Google</a>
+                              Google</a> -->
                     </div>
                     <button type="submit" class="btn btn-primary my-4">
                          Login
