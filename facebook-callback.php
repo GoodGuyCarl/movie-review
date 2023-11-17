@@ -1,6 +1,8 @@
 <?php
 session_start();
 require 'vendor/autoload.php';
+require_once 'database/dbconfig.php';
+$db = new DB();
 
 $fb = new Facebook\Facebook([
     'app_id' => '6621295174664204',
@@ -12,6 +14,7 @@ $helper = $fb->getRedirectLoginHelper();
 
 try {
     $accessToken = $helper->getAccessToken();
+    $response = $fb->get('/me?fields=id,name,email', $accessToken);
 } catch (Facebook\Exceptions\FacebookResponseException $e) {
     // When Graph returns an error
     echo 'Graph returned an error: ' . $e->getMessage();
@@ -38,11 +41,32 @@ if (!isset($accessToken)) {
 if (isset($accessToken)) {
     $oAuth2Client = $fb->getOAuth2Client();
     $tokenMetadata = $oAuth2Client->debugToken($accessToken);
-    $_SESSION['fb_user_id'] = (string) $tokenMetadata->getUserId();
-    $_SESSION['fb_name'] = (string) $tokenMetadata->getField('name');
-    $_SESSION['role'] = 'user';
-    $_SESSION['expire'] = time() + 30 * 60;
-    $_SESSION['fb_access_token'] = (string) $accessToken;
+    $fbUserId = mysqli_real_escape_string($db->mysql, (int) $tokenMetadata->getUserId());
+    $user = $db->select('users', '*');
+    echo '<pre>
+    ' . print_r($user) . '
+    </pre>';
+    if (empty($user)) {
+        $role = 'user';
+        $expire = time() + 30 * 60;
+        $fbAccessToken = mysqli_real_escape_string($db->mysql, (string) $accessToken);
+        $password = password_hash($fbAccessToken, PASSWORD_BCRYPT);
+        $email = $userNode = $response->getGraphUser()->getEmail();
+        $db->insert('users', array(
+            'id' => $fbUserId,
+            'email' => $email,
+            'password' => $password,
+            'role' => $role,
+        ));
+    } else {
+        $_SESSION['fb_user_id'] = $fbUserId;
+        $_SESSION['fb_access_token'] = (string) $accessToken;
+        $_SESSION['role'] = $role;
+        $_SESSION['expire'] = $expire;
+        $_SESSION['name'] = $userNode = $response->getGraphUser()->getName();
+    }
+
+
     header('Location: index.php');
     exit;
 }
