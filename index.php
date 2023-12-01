@@ -26,9 +26,9 @@ if (isset($_SESSION['fb_access_token'])) {
      <script src="js/slick.min.js"></script>
      <script src="js/002afb9e14.js"></script>
      <style>
-          .slick-slide {
-               margin: 0 20px;
-          }
+     .slick-slide {
+          margin: 0 20px;
+     }
      </style>
 </head>
 
@@ -39,13 +39,14 @@ if (isset($_SESSION['fb_access_token'])) {
                     <a href="./" class="mx-10 text-lg font-thin">Movie Reviews</a>
                </div>
                <div class="navbar-start md:navbar-center relative">
-                    <input id="searchInput" type="search" placeholder="Search movies.." class="input input-primary w-44 md:w-full text-inherit/50 pl-10" />
+                    <input id="searchInput" type="search" placeholder="Search movies.."
+                         class="input input-primary w-44 md:w-full text-inherit/50 pl-10" />
                     <span class="absolute flex items-center pl-3">
                          <i class="fa-solid fa-magnifying-glass"></i>
                     </span>
                </div>
                <div class="navbar-end gap-3 sm:mr-5">
-                    <?php if (isset($_SESSION['userid'])) {
+                    <?php if (isset($_SESSION['userid']) && !isset($_SESSION['fb_user_id'])) {
                          echo '<a onclick="logout()" class="btn btn-outline btn-primary"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>';
                     } else if (isset($_SESSION['fb_user_id'])) {
                          echo '<p class="text-sm font-thin">Hello, ' . $_SESSION['name'] . '</p>';
@@ -65,7 +66,8 @@ if (isset($_SESSION['fb_access_token'])) {
                <div class="flex mx-5 my-5">
                     <h1 class="text-2xl font-bold">Popular Today</h1>
                </div>
-               <div id="carousel-popular" class="carousel carousel-center justify-center rounded-box gap-5 mx-5 drop-shadow-xl snap-x overflow-x-scroll">
+               <div id="carousel-popular"
+                    class="carousel carousel-center justify-center rounded-box gap-5 mx-5 drop-shadow-xl snap-x overflow-x-scroll">
                     <div class="grid grid-cols-1 place-items-center gap-5">
                          <span class="loading loading-spinner loading-lg"></span>
                     </div>
@@ -75,7 +77,8 @@ if (isset($_SESSION['fb_access_token'])) {
                <div class="flex mx-5 my-5">
                     <h1 class="text-2xl font-bold">Recent Reviews</h1>
                </div>
-               <div id="carousel-reviews" class="carousel carousel-center justify-center rounded-box gap-5 mx-5 drop-shadow-xl snap-x overflow-x-scroll">
+               <div id="carousel-reviews"
+                    class="carousel carousel-center justify-center rounded-box gap-5 mx-5 drop-shadow-xl snap-x overflow-x-scroll">
                     <div class="grid grid-cols-1 place-items-center gap-5">
                          <span class="loading loading-spinner loading-lg"></span>
                     </div>
@@ -94,129 +97,129 @@ if (isset($_SESSION['fb_access_token'])) {
 
 </html>
 <script>
-     $(document).ready(() => {
-          loadPopular();
-          loadReviews();
-     });
-     const [main, popularCarousel, reviewsCarousel, reviewGrid] = [$('#mainDiv'), $('#carousel-popular'), $(
-          '#carousel-reviews'), $('#reviewGrid')];
-     const star = `<div><i class="fa-solid fa-star"></i></div>`;
-     const halfStar = `<div><i class="fa-solid fa-star-half-stroke"></i></div>`;
-     const emptyStar = `<div><i class="fa-regular fa-star"></i></div>`;
-     const debounceSearch = debounce(search, 500);
+$(document).ready(() => {
+     loadPopular();
+     loadReviews();
+});
+const [main, popularCarousel, reviewsCarousel, reviewGrid] = [$('#mainDiv'), $('#carousel-popular'), $(
+     '#carousel-reviews'), $('#reviewGrid')];
+const star = `<div><i class="fa-solid fa-star"></i></div>`;
+const halfStar = `<div><i class="fa-solid fa-star-half-stroke"></i></div>`;
+const emptyStar = `<div><i class="fa-regular fa-star"></i></div>`;
+const debounceSearch = debounce(search, 500);
 
-     function debounce(func, delay) {
-          let debounceTimer;
-          return function() {
-               const context = this;
-               const args = arguments;
-               clearTimeout(debounceTimer);
-               debounceTimer = setTimeout(() => func.apply(context, args), delay);
-          };
-     }
-     $('#searchInput').on('keyup', function() {
-          debounceSearch($(this).val());
-     });
+function debounce(func, delay) {
+     let debounceTimer;
+     return function() {
+          const context = this;
+          const args = arguments;
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => func.apply(context, args), delay);
+     };
+}
+$('#searchInput').on('keyup', function() {
+     debounceSearch($(this).val());
+});
 
-     function loadPopular() {
-          $.ajax({
-               method: 'get',
-               url: 'api.php',
-               data: {
-                    getPopularMovies: true
-               },
+function loadPopular() {
+     $.ajax({
+          method: 'get',
+          url: 'api.php',
+          data: {
+               getPopularMovies: true
+          },
 
-               success: function(response) {
-                    let movies = JSON.parse(response);
-                    popularCarousel.empty();
-                    if (movies.error) {
-                         popularCarousel.append(`<div>${movies.error}</div>`)
-                    } else {
-                         movies.results.forEach(function(movie) {
-                              popularCarousel.append(`
+          success: function(response) {
+               let movies = JSON.parse(response);
+               popularCarousel.empty();
+               if (movies.error) {
+                    popularCarousel.append(`<div>${movies.error}</div>`)
+               } else {
+                    movies.results.forEach(function(movie) {
+                         popularCarousel.append(`
                          <div class="carousel-item relative">
                              <img class="h-96 object-cover" src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="..."/>
                          </div>
                          `);
-                         });
-                         popularCarousel.slick({
-                              vertical: false,
-                              mobileFirst: true,
-                              prevArrow: ``,
-                              nextArrow: ``,
-                              width: '100%',
-                              variableWidth: true,
-                              infinite: true,
-                              autoplay: true,
-                              autoplaySpeed: 5000,
-                              centerMode: true,
-                              responsive: [{
-                                        breakpoint: 767,
-                                        settings: {
-                                             slidesToShow: 3,
-                                             slidesToScroll: 3,
-                                             infinite: true,
-                                        }
-                                   },
-                                   {
-                                        breakpoint: 1023,
-                                        settings: {
-                                             slidesToShow: 3,
-                                             slidesToScroll: 3,
-                                             infinite: true,
-                                             autoplay: true,
-                                             autoplaySpeed: 5000,
-                                        }
-                                   },
-                                   {
-                                        breakpoint: 1429,
-                                        settings: {
-                                             slidesToShow: 5,
-                                             slidesToScroll: 5,
-                                             infinite: true,
-                                             autoplay: true,
-                                             autoplaySpeed: 5000,
-                                             cssEase: 'ease-in',
-                                             speed: 750,
-                                             centerMode: false,
-                                        }
-                                   }
-                              ],
-                         });
-                    }
-               }
-          });
-     }
-
-     function loadReviews() {
-          $.ajax({
-               method: 'get',
-               url: 'api.php',
-               data: {
-                    getMovies: true
-               },
-               success: function(moviesResponse) {
-                    let movies = JSON.parse(moviesResponse);
-                    if (movies.error) {
-                         reviewsCarousel.empty();
-                         reviewsCarousel.append(`${movies.error}`)
-                         console.error('Error fetching movies: ', movies.error);
-                    }
-                    let moviesById = {};
-                    movies.forEach(movie => {
-                         moviesById[movie.id] = movie;
                     });
-                    $.ajax({
-                         method: 'get',
-                         url: 'api.php',
-                         data: {
-                              getReviews: true
-                         },
-                         success: function(reviewsResponse) {
-                              let reviews = JSON.parse(reviewsResponse);
-                              if (reviews.error) {
-                                   reviewsCarousel.empty();
-                                   (<?php if (isset($_SESSION['userid'])) {
+                    popularCarousel.slick({
+                         vertical: false,
+                         mobileFirst: true,
+                         prevArrow: ``,
+                         nextArrow: ``,
+                         width: '100%',
+                         variableWidth: true,
+                         infinite: true,
+                         autoplay: true,
+                         autoplaySpeed: 5000,
+                         centerMode: true,
+                         responsive: [{
+                                   breakpoint: 767,
+                                   settings: {
+                                        slidesToShow: 3,
+                                        slidesToScroll: 3,
+                                        infinite: true,
+                                   }
+                              },
+                              {
+                                   breakpoint: 1023,
+                                   settings: {
+                                        slidesToShow: 3,
+                                        slidesToScroll: 3,
+                                        infinite: true,
+                                        autoplay: true,
+                                        autoplaySpeed: 5000,
+                                   }
+                              },
+                              {
+                                   breakpoint: 1429,
+                                   settings: {
+                                        slidesToShow: 5,
+                                        slidesToScroll: 5,
+                                        infinite: true,
+                                        autoplay: true,
+                                        autoplaySpeed: 5000,
+                                        cssEase: 'ease-in',
+                                        speed: 750,
+                                        centerMode: false,
+                                   }
+                              }
+                         ],
+                    });
+               }
+          }
+     });
+}
+
+function loadReviews() {
+     $.ajax({
+          method: 'get',
+          url: 'api.php',
+          data: {
+               getMovies: true
+          },
+          success: function(moviesResponse) {
+               let movies = JSON.parse(moviesResponse);
+               if (movies.error) {
+                    reviewsCarousel.empty();
+                    reviewsCarousel.append(`${movies.error}`)
+                    console.error('Error fetching movies: ', movies.error);
+               }
+               let moviesById = {};
+               movies.forEach(movie => {
+                    moviesById[movie.id] = movie;
+               });
+               $.ajax({
+                    method: 'get',
+                    url: 'api.php',
+                    data: {
+                         getReviews: true
+                    },
+                    success: function(reviewsResponse) {
+                         let reviews = JSON.parse(reviewsResponse);
+                         if (reviews.error) {
+                              reviewsCarousel.empty();
+                              (<?php if (isset($_SESSION['userid'])) {
                                              echo "true";
                                         } else {
                                              echo "false";
@@ -229,13 +232,13 @@ if (isset($_SESSION['fb_access_token'])) {
                                     There are no reviews for any movies at the moment. Log in to make one!
                                 </h1>
                             `))
-                              } else {
-                                   reviewsCarousel.empty();
-                                   reviews.forEach(review => {
-                                        console.log(moviesById)
-                                        let movie = moviesById[review.movie_id];
-                                        if (movie) {
-                                             reviewsCarousel.append(`
+                         } else {
+                              reviewsCarousel.empty();
+                              reviews.forEach(review => {
+                                   console.log(moviesById)
+                                   let movie = moviesById[review.movie_id];
+                                   if (movie) {
+                                        reviewsCarousel.append(`
                                         <div class="card bg-neutral">
                                             <div class="card-body">
                                                 <h1 class="card-title">${movie.title}</h1>
@@ -249,75 +252,75 @@ if (isset($_SESSION['fb_access_token'])) {
                                                 </p>
                                             </div>
                                         </div>`);
-                                        } else {
-                                             console.error(
-                                                  `No movie found for review with movie id ${review.movie_id}`
-                                             );
-                                        }
-                                   });
-                                   reviewsCarousel.slick({
-                                        vertical: false,
-                                        prevArrow: ``,
-                                        nextArrow: ``,
-                                        width: '100%',
-                                        variableWidth: true,
-                                        slidesToShow: 4,
-                                        slidesToScroll: 4,
-                                   })
-                              }
+                                   } else {
+                                        console.error(
+                                             `No movie found for review with movie id ${review.movie_id}`
+                                        );
+                                   }
+                              });
+                              reviewsCarousel.slick({
+                                   vertical: false,
+                                   prevArrow: ``,
+                                   nextArrow: ``,
+                                   width: '100%',
+                                   variableWidth: true,
+                                   slidesToShow: 4,
+                                   slidesToScroll: 4,
+                              })
                          }
-                    })
-               }
-          })
-     }
+                    }
+               })
+          }
+     })
+}
 
-     function viewMovieReviews(movieId) {
-          $.ajax({
-               url: './api.php',
-               type: 'get',
-               data: {
-                    getMovies: true,
-                    id: movieId,
-               },
-               success: function(movieResponse) {
-                    let movies = JSON.parse(movieResponse);
-                    let moviesById = {};
-                    const main = $('#mainDiv');
-                    main.empty();
-                    movies.forEach(movie => {
-                         moviesById[movie.id] = movie;
-                         main.append(`
+function viewMovieReviews(movieId) {
+     $.ajax({
+          url: './api.php',
+          type: 'get',
+          data: {
+               getMovies: true,
+               id: movieId,
+          },
+          success: function(movieResponse) {
+               let movies = JSON.parse(movieResponse);
+               let moviesById = {};
+               const main = $('#mainDiv');
+               main.empty();
+               movies.forEach(movie => {
+                    moviesById[movie.id] = movie;
+                    main.append(`
                         <div id="sectionTitle" class="flex mx-5 my-5">
                             <h1 class="text-2xl font-bold">${movie.title}</h1>
                         </div>
                     `)
-                    });
-                    $.ajax({
-                         url: './api.php',
-                         type: 'get',
-                         data: {
-                              getMovieReviews: true,
-                              movieId: movieId,
-                         },
-                         success: function(response) {
-                              const reviews = JSON.parse(response);
-                              console.log(reviews);
-                              const main = $('#mainDiv');
-                              main.append(
-                                   `<div id="reviewsGrid" class="grid grid-cols-4 gap-5 mx-auto">`
-                              )
-                              const reviewGrid = $('#reviewsGrid');
-                              if (reviews.error) {
-                                   main.append(`
+               });
+               $.ajax({
+                    url: './api.php',
+                    type: 'get',
+                    data: {
+                         getMovieReviews: true,
+                         movieId: movieId,
+                    },
+                    success: function(response) {
+                         const reviews = JSON.parse(response);
+                         console.log(reviews);
+                         const main = $('#mainDiv');
+                         main.append(
+                              `<div id="reviewsGrid" class="grid grid-cols-4 gap-5 mx-auto">`
+                         )
+                         const reviewGrid = $('#reviewsGrid');
+                         if (reviews.error) {
+                              main.append(`
                             <div class="mx-auto">
                                 ${reviews.error}
                             </div>
                             `)
-                              } else {
-                                   reviews.forEach((review) => {
-                                        let movie = moviesById[review.movie_id];
-                                        if (movie) {
-                                             reviewGrid.append(`
+                         } else {
+                              reviews.forEach((review) => {
+                                   let movie = moviesById[review.movie_id];
+                                   if (movie) {
+                                        reviewGrid.append(`
                                     <div class="bg-base-200 p-5 rounded-lg">
                                         <div class="flex flex-row">
                                             ${star.repeat(review.review_rating)}
@@ -329,46 +332,46 @@ if (isset($_SESSION['fb_access_token'])) {
                                         </div>
                                     </div>
                                 `)
-                                        }
-                                   })
-                              }
-                              reviewGrid.append(`</div>`)
+                                   }
+                              })
                          }
-                    })
-               }
-          })
-     }
+                         reviewGrid.append(`</div>`)
+                    }
+               })
+          }
+     })
+}
 
-     function search(query) {
-          $.ajax({
-               method: 'get',
-               url: 'api.php',
-               data: {
-                    searchMovies: true,
-                    query: query,
-               },
-               success: function(response) {
-                    if (query === '') {
-                         return false;
-                    } else {
-                         let movies = JSON.parse(response);
-                         main.empty();
-                         main.append(`
+function search(query) {
+     $.ajax({
+          method: 'get',
+          url: 'api.php',
+          data: {
+               searchMovies: true,
+               query: query,
+          },
+          success: function(response) {
+               if (query === '') {
+                    return false;
+               } else {
+                    let movies = JSON.parse(response);
+                    main.empty();
+                    main.append(`
                     <div class="grid grid-cols-1 justify-center gap-5">
                         <h1 class="text-2xl font-bold text-center mb-5">Search Results</h1>
                     </div>
                     `);
-                         if (movies.error) {
-                              main.append(`<div class="font-thin mx-auto">
+                    if (movies.error) {
+                         main.append(`<div class="font-thin mx-auto">
                         ${movies.error}
                         </div>`);
-                         } else {
-                              main.append(
-                                   `<div id="search" class="grid grid-cols-1 mx-10 gap-x-0 gap-y-5 md:grid-cols-2 md:place-items-center lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-2">`
-                              )
-                              let search = $('#search');
-                              movies.forEach(function(movie) {
-                                   search.append(`
+                    } else {
+                         main.append(
+                              `<div id="search" class="grid grid-cols-1 mx-10 gap-x-0 gap-y-5 md:grid-cols-2 md:place-items-center lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-2">`
+                         )
+                         let search = $('#search');
+                         movies.forEach(function(movie) {
+                              search.append(`
                             <div class="card bg-neutral min-h-16 w-full md:w-72">
                                 <div class="card-body gap-5">
                                     <div class="card-title line-clamp-1">${movie.title}</div>
@@ -387,54 +390,54 @@ if (isset($_SESSION['fb_access_token'])) {
                                 </div>
                             </div>
                             `)
-                              });
-                         }
-                         main.append(`</div>`)
+                         });
                     }
-               },
-          });
-          return false;
-     }
-
-     function logout() {
-          $.ajax({
-               url: 'api.php',
-               type: 'post',
-               data: {
-                    logout: true,
-               },
-               success: function(response) {
-                    sessionStorage.setItem('isLoggedIn', 'false');
-                    const res = JSON.parse(response);
-                    if (res.success) {
-                         window.location.href = './login';
-                    } else {
-                         alert(res.error);
-                    }
+                    main.append(`</div>`)
                }
-          });
-     }
+          },
+     });
+     return false;
+}
 
-     function sessionExpire() {
-          $.ajax({
-               url: 'api.php',
-               type: 'post',
-               data: {
-                    logout: true,
-                    expire: true
-               },
-               success: function(response) {
-                    const res = JSON.parse(response);
-                    if (res.success) {
-                         alert(res.success)
-                         window.location.href = './login';
-                    } else {
-                         alert(res.error);
-                    }
+function logout() {
+     $.ajax({
+          url: 'api.php',
+          type: 'post',
+          data: {
+               logout: true,
+          },
+          success: function(response) {
+               sessionStorage.setItem('isLoggedIn', 'false');
+               const res = JSON.parse(response);
+               if (res.success) {
+                    window.location.href = './login';
+               } else {
+                    alert(res.error);
                }
-          });
-     }
-     setTimeout(function() {
-          sessionExpire();
-     }, 30 * 60 * 1000);
+          }
+     });
+}
+
+function sessionExpire() {
+     $.ajax({
+          url: 'api.php',
+          type: 'post',
+          data: {
+               logout: true,
+               expire: true
+          },
+          success: function(response) {
+               const res = JSON.parse(response);
+               if (res.success) {
+                    alert(res.success)
+                    window.location.href = './login';
+               } else {
+                    alert(res.error);
+               }
+          }
+     });
+}
+setTimeout(function() {
+     sessionExpire();
+}, 30 * 60 * 1000);
 </script>

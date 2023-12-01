@@ -44,12 +44,12 @@ if (isset($accessToken)) {
     $fbUserId = $tokenMetadata->getUserId();
     $email =  $response->getGraphUser()->getEmail();
     $user = $db->select('users', '*', "email = '$email'");
+    $expire = time() + 30 * 60;
     echo '<pre>
     ' . print_r($user) . '
     </pre>';
     if (!$user) {
         $role = 'user';
-        $expire = time() + 30 * 60;
         $fbAccessToken = mysqli_real_escape_string($db->mysql, (string) $accessToken);
         $password = password_hash($fbAccessToken, PASSWORD_BCRYPT);
         $email = $userNode = $response->getGraphUser()->getEmail();
@@ -59,6 +59,7 @@ if (isset($accessToken)) {
             'role' => $role,
         ));
     } else {
+        $_SESSION['userid'] = $user[0]['id'];
         $_SESSION['fb_user_id'] = $fbUserId;
         $_SESSION['fb_access_token'] = (string) $accessToken;
         $_SESSION['role'] = $user[0]['role'];
